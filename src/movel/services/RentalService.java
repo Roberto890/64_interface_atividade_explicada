@@ -1,6 +1,7 @@
 package movel.services;
 
 import model.entities.CarRental;
+import model.entities.Invoice;
 
 public class RentalService {
 	private Double pricePerDay;
@@ -15,6 +16,20 @@ public class RentalService {
 	}
 	
 	public void processInvoice(CarRental carRental) {
+		long t1 = carRental.getStart().getTime();
+		long t2 = carRental.getFinish().getTime();
+			//t2-t1 é em milisegundos divido por 1000 para virar seg 60 pra min e 60 pra horas
+		double hours = (double)(t2-t1) / 1000 /60 /60;
+		double basicPayment;
+		if (hours <= 12.0) {
+								//math ceil arredonda pra cima
+			basicPayment = Math.ceil(hours) * pricePerHour;
+		}else {
+			basicPayment = Math.ceil(hours/24) * pricePerDay;
+		}
 		
+		double tax = taxService.tax(basicPayment);
+		
+		carRental.setInvoice(new Invoice(basicPayment,tax));
 	}
 }
